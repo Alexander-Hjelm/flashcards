@@ -14,16 +14,17 @@ class Flashcard:
         return f"{self.question} -> {self.answer} | {self.description}"
 
 class WordMetadata:
-    def __init__(self, word, score):
+    def __init__(self, word, score, omitted):
         self.word = word
         self.score = score
+        self.omitted = omitted
 
     def __str__(self):
-        return f"{self.word}%%{self.score}\n"
+        return f"{self.word}%%{self.score}%%{self.omitted}\n"
     
     def from_string(string):
         split = string.split("%%")
-        return WordMetadata(split[0].strip(), split[1].strip())
+        return WordMetadata(split[0].strip(), split[1].strip(), split[2].strip())
 
 # Define the command-line arguments
 parser = argparse.ArgumentParser(description='Read a Markdown file and output its contents.')
@@ -49,7 +50,7 @@ else:
 
 # Open the words file and read its contents line by line
 with open(words_file, 'r', encoding='UTF8') as file:
-    lines = file.readlines()
+    words_lines = file.readlines()
 
 # Open the meta file and read its contents line by line
 with open(meta_file, 'r', encoding='UTF8') as file:
@@ -60,7 +61,7 @@ with open(meta_file, 'r', encoding='UTF8') as file:
 flashcards = []
 
 # Initialize flashcards
-for line in lines:
+for line in words_lines:
     if line.startswith("|"):
         line_formatted = line.strip()
         line_split = line_formatted.split("|")
@@ -75,13 +76,13 @@ if meta_file_created_this_run:
     for flashcard in flashcards:
         meta_data_filtered = filter(lambda n: n.word == flashcard.question, meta_data)
         if len(list(meta_data_filtered)) == 0:
-            meta_data.append(WordMetadata(flashcard.question, 0.0))
+            meta_data.append(WordMetadata(flashcard.question, 0.0, 0))
 
 # Remove flashcards not in metadata
 flashcards_new = []
 for meta in meta_data:
     flashcards_filtered = list(filter(lambda n: n.question == meta.word, flashcards))
-    if len(flashcards_filtered) > 0:
+    if len(flashcards_filtered) > 0 and meta.omitted == "0":
         flashcards_new.append(flashcards_filtered[0])
 
 flashcards = flashcards_new
@@ -126,7 +127,7 @@ def start_flashcards():
             user_answer_2 = input("Was you answer correct? (y/n/omit)")
         if user_answer_2.lower() == 'omit':
             print("Omitting card: ", flashcard.question)
-            meta_data.remove(meta_data_filtered)
+            meta_data_filtered.omitted = 1
             flashcards_filtered = list(filter(lambda n: n.question == flashcard.question, flashcards))
             flashcards.remove(flashcards_filtered[0])
         elif user_answer_2.lower() == 'y':
