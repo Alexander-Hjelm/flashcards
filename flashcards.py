@@ -72,11 +72,10 @@ for line in words_lines:
         flashcards.append(flashcard)
 
 # Initialize metadata
-if meta_file_created_this_run:
-    for flashcard in flashcards:
-        meta_data_filtered = filter(lambda n: n.word == flashcard.question, meta_data)
-        if len(list(meta_data_filtered)) == 0:
-            meta_data.append(WordMetadata(flashcard.question, 0.0, 0))
+for flashcard in flashcards:
+    meta_data_filtered = filter(lambda n: n.word == flashcard.question, meta_data)
+    if len(list(meta_data_filtered)) == 0:
+        meta_data.append(WordMetadata(flashcard.question, 0.0, 0))
 
 # Remove flashcards not in metadata
 flashcards_new = []
