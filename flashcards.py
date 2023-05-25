@@ -2,7 +2,7 @@ import random
 import argparse
 import os
 
-# USAGE: python3 .\flashcards.py C:\Users\Alexander\Documents\chinese\chinese.md
+# USAGE: python3 .\flashcards.py C:\Users\Alexander\Documents\language-practice\chinese.md
 
 class Flashcard:
     def __init__(self, question, answer, description):
@@ -25,6 +25,12 @@ class WordMetadata:
     def from_string(string):
         split = string.split("%%")
         return WordMetadata(split[0].strip(), split[1].strip(), split[2].strip())
+
+def calculate_total_score(metadatas):
+    score = 0.0
+    for metadata in metadatas:
+        score = score + float(metadata.score)
+    return score
 
 # Define the command-line arguments
 parser = argparse.ArgumentParser(description='Read a Markdown file and output its contents.')
@@ -99,6 +105,7 @@ def start_flashcards():
     total_questions = 0
     score_eval_attempts = 0
     score_eval_attempts_max = 999999
+    starting_total_score = calculate_total_score(meta_data)
     while True:
         if score_eval_attempts > score_eval_attempts_max:
             print("You have already reached max score on all flash cards, good job!")
@@ -152,6 +159,30 @@ def start_flashcards():
 
     print("Exiting flashcards...")
     print("You got", correct_answers, "out of", min(correct_answers, max(0, total_questions-1)), "correct.")
+
+    # Generate report
+    number_of_words = len(flashcards)
+    final_total_score = calculate_total_score(meta_data)
+    max_total_score = 1.0 * number_of_words
+    max_total_score = 1.0 * number_of_words
+
+    # Calculate number of unique characters
+    total_characters = ""
+    for flashcard in flashcards:
+        q = flashcard.question
+        total_characters = total_characters + q
+    unique_characters = ''.join(list(set(total_characters))).replace(",", "").replace(".", "").replace(",", "").replace("!", "").replace(",", "").replace("?", "").replace("？", "").replace(" ", "").replace("X", "").replace("Y", "")
+    number_of_unique_characters = len(unique_characters)
+
+    print("**************************************")
+    print("Unique characters: " + unique_characters)
+    print(f"Total score (starting): {starting_total_score}")
+    print(f"Total score (final): {final_total_score}")
+    print(f"Total score (max): {max_total_score}")
+    print(f"Gained this run: {final_total_score-starting_total_score}")
+    print("**************************************")
+    print(f"# Words in list: {number_of_words}")
+    print(f"# Unique characters in list: {number_of_unique_characters}")
 
 # Call the start_flashcards function to start the quiz
 start_flashcards()
